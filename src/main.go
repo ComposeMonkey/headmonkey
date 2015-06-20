@@ -51,7 +51,7 @@ func main() {
 	// start a web server which does the API server
 	fmt.Printf("going to start server with proxies %s and port %d\n", proxies, *serverPort)
 
-	http.HandleFunc("/proxies", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/proxies/index", func(w http.ResponseWriter, r *http.Request) {
 		var proxyList = make([]string, len(proxies))
 		for i, proxy := range proxies {
 			proxyList[i] = proxy.containerName

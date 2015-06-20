@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 )
 
 const BEHAVIOR_URL = "http://%s/behavior"
@@ -50,14 +49,13 @@ func getVConfig(proxyName string) (error, *VConfig) {
 	return nil, &vconfig
 }
 
-func getProxyName(uri string) string {
-	urlParts := strings.Split(uri, "/")
-	proxyName := urlParts[len(urlParts)-1]
+func getProxyName(req *http.Request) string {
+	proxyName := req.URL.Query().Get("proxy")
 	return proxyName
 }
 
 func GETProxyHandler(res http.ResponseWriter, req *http.Request) {
-	proxyName := getProxyName(req.URL.RequestURI())
+	proxyName := getProxyName(req)
 	if err, vconfig := getVConfig(proxyName); err == nil {
 		reply, _ := json.Marshal(*vconfig)
 		res.Write(reply)
@@ -65,7 +63,7 @@ func GETProxyHandler(res http.ResponseWriter, req *http.Request) {
 }
 
 func PUTProxyHandler(res http.ResponseWriter, req *http.Request) {
-	proxyName := getProxyName(req.URL.RequestURI())
+	proxyName := getProxyName(req)
 	rawJSON, _ := ioutil.ReadAll(req.Body)
 	err := updateVConfig(proxyName, string(rawJSON))
 
