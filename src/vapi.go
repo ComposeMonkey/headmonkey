@@ -56,27 +56,33 @@ func getProxyName(uri string) string {
 	return proxyName
 }
 
-func makeGETProxyHandler() handler {
-	return func(res http.ResponseWriter, req *http.Request) {
-		proxyName := getProxyName(req.URL.RequestURI())
-		if err, vconfig := getVConfig(proxyName); err == nil {
-			reply, _ := json.Marshal(*vconfig)
-			res.Write(reply)
-		}
+func GETProxyHandler(res http.ResponseWriter, req *http.Request) {
+	proxyName := getProxyName(req.URL.RequestURI())
+	if err, vconfig := getVConfig(proxyName); err == nil {
+		reply, _ := json.Marshal(*vconfig)
+		res.Write(reply)
 	}
 }
 
-func makePUTProxyHandler() handler {
-	return func(res http.ResponseWriter, req *http.Request) {
-		proxyName := getProxyName(req.URL.RequestURI())
-		rawJSON, _ := ioutil.ReadAll(req.Body)
-		err := updateVConfig(proxyName, string(rawJSON))
+func PUTProxyHandler(res http.ResponseWriter, req *http.Request) {
+	proxyName := getProxyName(req.URL.RequestURI())
+	rawJSON, _ := ioutil.ReadAll(req.Body)
+	err := updateVConfig(proxyName, string(rawJSON))
 
-		if err != nil {
-			res.WriteHeader(http.StatusBadRequest)
-			fmt.Println(err)
-			res.Write([]byte("BAD"))
+	if err != nil {
+		res.WriteHeader(http.StatusBadRequest)
+		fmt.Println(err)
+		res.Write([]byte("BAD"))
+	}
+	res.Write([]byte("OK"))
+}
+
+func makeProxyHandler() handler {
+	return func(res http.ResponseWriter, req *http.Request) {
+		if req.Method == "PUT" {
+			PUTProxyHandler(res, req)
+		} else if req.Method == "GET" {
+			GETProxyHandler(res, req)
 		}
-		res.Write([]byte("OK"))
 	}
 }
