@@ -10,7 +10,6 @@ import (
 )
 
 const BEHAVIOR_URL = "http://%s/behavior"
-const BEHAVIOR_BODY = `{ "behavior": "%s"}`
 
 type handler func(http.ResponseWriter, *http.Request)
 
@@ -18,8 +17,8 @@ type VConfig struct {
 	Behavior string `json:"behavior"`
 }
 
-func updateVConfig(proxyName string, behavior string) error {
-	jsonStr := []byte(fmt.Sprintf(BEHAVIOR_BODY, behavior))
+func updateVConfig(proxyName string, behaviorJSON string) error {
+	jsonStr := []byte(behaviorJSON)
 	url := fmt.Sprintf(proxyName, BEHAVIOR_URL)
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
