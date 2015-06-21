@@ -1,5 +1,5 @@
 # headmonkey
-# CROSS ORIGIN FIXED
+# CROSS ORIGIN FIXED + PARSING LOGIC FIXED
 server to orchestrate failure scenarios
 
 Provide APIs to caller:
