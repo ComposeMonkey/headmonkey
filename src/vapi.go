@@ -18,28 +18,27 @@ type VConfig struct {
 
 func updateVConfig(proxyName string, behaviorJSON string) error {
 	jsonStr := []byte(behaviorJSON)
-	url := fmt.Sprintf(proxyName, BEHAVIOR_URL)
+	url := fmt.Sprintf(BEHAVIOR_URL, proxyName)
+        fmt.Println("PUT: %s", behaviorJSON)
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	defer resp.Body.Close()
-
 	if err != nil {
 		panic(err)
 	}
-
+	defer resp.Body.Close()
 	return err
 }
 
 func getVConfig(proxyName string) (error, *VConfig) {
-	resp, err := http.Get(fmt.Sprintf(proxyName, BEHAVIOR_URL))
-	defer resp.Body.Close()
-
+	resp, err := http.Get(fmt.Sprintf(BEHAVIOR_URL, proxyName))
+        fmt.Println("ERROR: ", err)
 	if err != nil {
 		return err, nil
 	}
+	defer resp.Body.Close()
 
 	vconfig := VConfig{}
 
