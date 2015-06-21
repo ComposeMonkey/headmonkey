@@ -19,7 +19,7 @@ type VConfig struct {
 func updateVConfig(proxyName string, behaviorJSON string) error {
 	jsonStr := []byte(behaviorJSON)
 	url := fmt.Sprintf(BEHAVIOR_URL, proxyName)
-        fmt.Println("PUT: %s", behaviorJSON)
+	fmt.Println("PUT: %s", behaviorJSON)
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 
@@ -34,7 +34,7 @@ func updateVConfig(proxyName string, behaviorJSON string) error {
 
 func getVConfig(proxyName string) (error, *VConfig) {
 	resp, err := http.Get(fmt.Sprintf(BEHAVIOR_URL, proxyName))
-        fmt.Println("ERROR: ", err)
+	fmt.Println("ERROR: ", err)
 	if err != nil {
 		return err, nil
 	}
@@ -50,7 +50,7 @@ func getVConfig(proxyName string) (error, *VConfig) {
 
 func getProxyName(req *http.Request, containerNameToIp map[string]string) string {
 	proxyName := req.URL.Query().Get("proxy")
-	ipAddress := containerNameToIp["/" + proxyName]
+	ipAddress := containerNameToIp["/"+proxyName]
 
 	fmt.Printf("translating container name %s to ip address %s using map %s\n", proxyName, ipAddress, containerNameToIp)
 	return ipAddress
@@ -80,6 +80,10 @@ func PUTProxyHandler(res http.ResponseWriter, req *http.Request, containerNameTo
 
 func makeProxyHandler(containerNameToIp map[string]string) handler {
 	return func(res http.ResponseWriter, req *http.Request) {
+		if corsSetup(w, r) {
+			return
+		}
+
 		if req.Method == "PUT" {
 			PUTProxyHandler(res, req, containerNameToIp)
 		} else if req.Method == "GET" {

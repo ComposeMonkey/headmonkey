@@ -16,6 +16,25 @@ func check(e error) {
 	}
 }
 
+func corsSetup(w http.ResponseWriter, r *http.Request) bool { // CORS header
+	if r.Method != "OPTION" {
+		return false
+	}
+
+	origin := r.Header["Origin"]
+
+	if len(origin) == 1 {
+		w.Header().Add("Access-Control-Allow-Origin", origin[0])
+	}
+
+	w.Header().Add("Access-Control-Allow-Headers", "DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,"+
+		"If-Modified-Since,Cache-Control,Content-Type,Referer,x-access-token")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Add("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
+	w.Header().Add("Access-Control-Allow-Headers", "Content-Type")
+	w.WriteHeader(http.StatusOK)
+	return true
+}
 
 func main() {
 	filename := flag.String("filename", "", "file containing list of proxies")
@@ -37,8 +56,12 @@ func main() {
 	fmt.Printf("going to start server with proxies %s and port %d\n", containerNameToIp, *serverPort)
 
 	http.HandleFunc("/proxies/index", func(w http.ResponseWriter, r *http.Request) {
+		if corsSetup(w, r) {
+			return
+		}
 
 		jsonBytes, e := json.Marshal(proxyNames)
+
 		if e != nil {
 			http.Error(w, "JSON marshaling error", 500)
 		} else {
