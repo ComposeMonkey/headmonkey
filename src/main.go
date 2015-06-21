@@ -48,7 +48,7 @@ func main() {
 
 	dat, err := ioutil.ReadFile(*filename)
 	check(err)
-	proxyNames := strings.Split(strings.TrimSpace(string(dat)), ",")
+	proxyNames := strings.Split(strings.TrimSpace(string(dat)), "\n")
 
 	containerNameToIp := getContainersWithAddresses(proxyNames)
 
