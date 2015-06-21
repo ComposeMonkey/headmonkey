@@ -17,10 +17,6 @@ func check(e error) {
 }
 
 func corsSetup(w http.ResponseWriter, r *http.Request) bool { // CORS header
-	if r.Method != "OPTION" {
-		return false
-	}
-
 	origin := r.Header["Origin"]
 
 	if len(origin) == 1 {
@@ -33,6 +29,10 @@ func corsSetup(w http.ResponseWriter, r *http.Request) bool { // CORS header
 	w.Header().Add("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
 	w.Header().Add("Access-Control-Allow-Headers", "Content-Type")
 	w.WriteHeader(http.StatusOK)
+
+	if r.Method != "OPTION" {
+		return false
+	}
 	return true
 }
 
@@ -51,7 +51,7 @@ func main() {
 
 	proxyNamesRaw := strings.Split(strings.TrimSpace(string(dat)), "\n")
 	proxyNames := make([]string, len(proxyNamesRaw))
-        copy(proxyNames, proxyNamesRaw)
+	copy(proxyNames, proxyNamesRaw)
 	for idx, proxyName := range proxyNamesRaw {
 		parts := strings.Split(proxyName, ":")
 		if len(parts) == 2 {
