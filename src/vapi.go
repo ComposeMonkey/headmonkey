@@ -80,7 +80,7 @@ func PUTProxyHandler(res http.ResponseWriter, req *http.Request, containerNameTo
 
 func makeProxyHandler(containerNameToIp map[string]string) handler {
 	return func(res http.ResponseWriter, req *http.Request) {
-		if corsSetup(w, r) {
+		if corsSetup(res, req) {
 			return
 		}
 
