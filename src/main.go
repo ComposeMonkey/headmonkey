@@ -52,7 +52,7 @@ func main() {
 	proxyNamesRaw := strings.Split(strings.TrimSpace(string(dat)), "\n")
 	proxyNames := make([]string, len(proxyNamesRaw))
 
-	for idx, proxyName := range proxyNames {
+	for idx, proxyName := range proxyNamesRaw {
 		parts := strings.Split(proxyName, ":")
 		if len(parts) == 2 {
 			proxyNames[idx] = "figtest_" + parts[1] + parts[2] + "_1"
