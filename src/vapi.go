@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-const BEHAVIOR_URL = "http://%s/behavior"
+const BEHAVIOR_URL = "http://%s:2020/behavior"
 
 type handler func(http.ResponseWriter, *http.Request)
 
@@ -49,21 +49,25 @@ func getVConfig(proxyName string) (error, *VConfig) {
 	return nil, &vconfig
 }
 
-func getProxyName(req *http.Request) string {
+func getProxyName(req *http.Request, containerNameToIp map[string]string) string {
 	proxyName := req.URL.Query().Get("proxy")
-	return proxyName
+	ipAddress := containerNameToIp["/" + proxyName]
+
+	fmt.Printf("translating container name %s to ip address %s using map %s\n", proxyName, ipAddress, containerNameToIp)
+	return ipAddress
 }
 
-func GETProxyHandler(res http.ResponseWriter, req *http.Request) {
-	proxyName := getProxyName(req)
+func GETProxyHandler(res http.ResponseWriter, req *http.Request, containerNameToIp map[string]string) {
+	proxyName := getProxyName(req, containerNameToIp)
+	fmt.Printf("sending GET to %s\n", proxyName)
 	if err, vconfig := getVConfig(proxyName); err == nil {
 		reply, _ := json.Marshal(*vconfig)
 		res.Write(reply)
 	}
 }
 
-func PUTProxyHandler(res http.ResponseWriter, req *http.Request) {
-	proxyName := getProxyName(req)
+func PUTProxyHandler(res http.ResponseWriter, req *http.Request, containerNameToIp map[string]string) {
+	proxyName := getProxyName(req, containerNameToIp)
 	rawJSON, _ := ioutil.ReadAll(req.Body)
 	err := updateVConfig(proxyName, string(rawJSON))
 
@@ -75,12 +79,12 @@ func PUTProxyHandler(res http.ResponseWriter, req *http.Request) {
 	res.Write([]byte("OK"))
 }
 
-func makeProxyHandler() handler {
+func makeProxyHandler(containerNameToIp map[string]string) handler {
 	return func(res http.ResponseWriter, req *http.Request) {
 		if req.Method == "PUT" {
-			PUTProxyHandler(res, req)
+			PUTProxyHandler(res, req, containerNameToIp)
 		} else if req.Method == "GET" {
-			GETProxyHandler(res, req)
+			GETProxyHandler(res, req, containerNameToIp)
 		}
 	}
 }
