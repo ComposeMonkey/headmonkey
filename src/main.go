@@ -48,7 +48,18 @@ func main() {
 
 	dat, err := ioutil.ReadFile(*filename)
 	check(err)
-	proxyNames := strings.Split(strings.TrimSpace(string(dat)), "\n")
+
+	proxyNamesRaw := strings.Split(strings.TrimSpace(string(dat)), "\n")
+	proxyNames := make([]string, len(proxyNamesRaw))
+
+	for idx, proxyName := range proxyNames {
+		parts := strings.Split(proxyName, ":")
+		if len(parts) == 2 {
+			proxyNames[idx] = "figtest_" + parts[1] + parts[2] + "_1"
+		} else {
+			proxyNames[idx] = parts[0] + "_" + parts[1] + parts[2] + "_1"
+		}
+	}
 
 	containerNameToIp := getContainersWithAddresses(proxyNames)
 
@@ -60,7 +71,8 @@ func main() {
 			return
 		}
 
-		jsonBytes, e := json.Marshal(proxyNames)
+		// Return the raw file to allow frontend to understand topology.
+		jsonBytes, e := json.Marshal(proxyNamesRaw)
 
 		if e != nil {
 			http.Error(w, "JSON marshaling error", 500)
